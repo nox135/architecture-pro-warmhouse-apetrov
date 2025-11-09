@@ -1,0 +1,54 @@
+@startuml C4_Containers_All
+!include ../C4_Container.puml
+
+
+' === Участники системы ===
+Person(user, "Пользователь", "Управляет устройствами и просматривает данные через веб или мобильное приложение")
+
+System_Ext(devices, "Умные устройства", "Физические датчики, реле, камеры, ворота")
+System_Ext(partners, "Партнёрские API", "Интеграция с устройствами партнёров (MQTT, Zigbee, HTTP)")
+
+' === Система "Тёплый дом" ===
+System_Boundary(home_system, "Экосистема 'Тёплый дом'") {
+
+    ' --- API Gateway ---
+    Container(api_gateway, "API Gateway", "Nginx / Flask", "Единая точка входа для всех клиентов. Маршрутизация запросов к микросервисам")
+
+    ' --- Домен пользователей ---
+    Container(user_service, "User Service", "Flask", "Регистрация, аутентификация, профили пользователей")
+    ContainerDb(user_db, "Users DB", "PostgreSQL", "Таблицы users, homes, roles, sessions")
+
+    ' --- Домен устройств ---
+    Container(device_service, "Device Service", "Flask", "Регистрация и конфигурация устройств")
+    Container(control_service, "Control Service", "Flask", "Обработка команд для управления устройствами")
+    ContainerDb(device_db, "Devices DB", "PostgreSQL", "Таблицы devices, device_types, device_state, integration_tokens")
+
+    ' --- Домен телеметрии ---
+    Container(telemetry_service, "Telemetry Service", "FastAPI", "Сбор и хранение данных телеметрии от устройств")
+    Container(analytics_service, "Analytics Service", "FastAPI", "Аналитика и отчёты по данным телеметрии")
+    ContainerDb(telemetry_db, "Telemetry DB", "TimescaleDB", "Таблицы telemetry_data, aggregated_metrics"))
+}
+
+' === Связи ===
+Rel(user, api_gateway, "Отправляет запросы", "HTTPS/REST")
+
+' --- Взаимодействие через API Gateway ---
+Rel(api_gateway, user_service, "Запросы авторизации и профиля", "REST")
+Rel(api_gateway, device_service, "Регистрация и конфигурация устройств", "REST")
+Rel(api_gateway, control_service, "Команды управления устройствами", "REST")
+Rel(api_gateway, telemetry_service, "Передача и запрос данных телеметрии", "REST")
+Rel(api_gateway, analytics_service, "Запрос аналитики и отчётов", "REST")
+
+' --- Взаимодействие между микросервисами ---
+Rel(user_service, user_db, "Чтение и запись данных пользователей", "SQL")
+Rel(device_service, device_db, "Чтение и запись данных об устройствах", "SQL")
+Rel(control_service, device_db, "Чтение состояния устройств", "SQL")
+Rel(telemetry_service, telemetry_db, "Хранение данных телеметрии", "SQL")
+Rel(analytics_service, telemetry_db, "Чтение агрегированных данных", "SQL")
+
+' --- Взаимодействие с внешними системами ---
+Rel(device_service, partners, "Интеграция с внешними API", "HTTP / MQTT / Zigbee")
+Rel(control_service, devices, "Отправка команд", "HTTP / MQTT")
+Rel(devices, telemetry_service, "Передача показаний", "HTTP / MQTT")
+
+@enduml

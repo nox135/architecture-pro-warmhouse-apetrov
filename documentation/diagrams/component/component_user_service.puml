@@ -1,0 +1,16 @@
+@startuml C4_Components_UserService
+!include ../C4_Component.puml
+
+Container_Boundary(user_service, "User Service") {
+    Component(api, "User API", "Flask REST API", "Обрабатывает запросы: регистрация, вход, профиль")
+    Component(auth_module, "Auth Module", "Python module", "Аутентификация и генерация JWT токенов")
+    Component(profile_manager, "Profile Manager", "Python module", "CRUD операции с профилями, настройками, ролями")
+    ComponentDb(user_db, "Users DB", "PostgreSQL", "Таблицы: users, homes, roles, sessions")
+}
+
+Rel(api, auth_module, "Проверяет токены, логин/регистрация")
+Rel(api, profile_manager, "Выполняет CRUD запросы")
+Rel(profile_manager, user_db, "Читает и пишет")
+Rel(auth_module, user_db, "Проверяет пользователя и сессии")
+
+@enduml

@@ -1,0 +1,20 @@
+@startuml C4_Containers_telemetryService
+!include ../C4_Container.puml
+
+System_Boundary(ts, "Telemetry Service") {
+    Container(api, "Telemetry API", "FastAPI / Python", "Получает и предоставляет данные телеметрии")
+    Container(collector, "Data Collector", "Python", "Принимает данные от устройств")
+    Container(storage, "Data Storage", "Python", "Сохраняет телеметрию в БД")
+    Container(analytics, "Analytics Engine", "Python", "Обработка и анализ данных телеметрии")
+    ContainerDb(db, "Telemetry DB", "TimescaleDB / PostgreSQL", "Хранение телеметрии, истории показаний")
+}
+
+System_Ext(ext_device, "Устройства", "Передают данные телеметрии (температура, состояние)")
+
+Rel(ext_device, collector, "Отправляет данные")
+Rel(collector, storage, "Сохраняет данные")
+Rel(api, analytics, "Запросы статистики и графиков")
+Rel(storage, db, "Чтение/запись данных телеметрии")
+Rel(analytics, db, "Анализ данных")
+
+@enduml

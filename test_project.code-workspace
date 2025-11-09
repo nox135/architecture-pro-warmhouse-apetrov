@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "../test_project"
+		},
+		{
+			"path": "../sprint 1 docker compose"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {}
+}

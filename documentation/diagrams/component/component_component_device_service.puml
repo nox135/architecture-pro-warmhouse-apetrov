@@ -1,0 +1,18 @@
+@startuml C4_Components_device_service
+!include ../C4_Component.puml
+
+Container_Boundary(device_service, "Device Service") {
+    Component(api, "Device API", "Flask REST API", "Регистрация и управление устройствами")
+    Component(device_manager, "Device Manager", "Python module", "Добавление/удаление устройств, конфигурация")
+    Component(integration_adapter, "Integration Adapter", "Python module", "Интеграция с внешними устройствами партнёров")
+    ComponentDb(device_db, "Devices DB", "PostgreSQL", "Таблицы: devices, device_types, device_state, integration_tokens")
+}
+
+System_Ext(partner_api, "Партнёрские устройства", "MQTT, HTTP API")
+
+Rel(api, device_manager, "Вызывает CRUD операции")
+Rel(device_manager, device_db, "Читает и пишет данные")
+Rel(integration_adapter, partner_api, "Обменивается данными с внешними устройствами")
+Rel(device_manager, integration_adapter, "Передаёт команды партнёрским устройствам")
+
+@enduml

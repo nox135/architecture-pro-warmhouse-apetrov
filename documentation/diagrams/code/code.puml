@@ -1,0 +1,109 @@
+@startuml AnalyticsService_ClassDiagram
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype ortho
+title Analytics Service - UML Class Diagram
+
+' === Контроллер ===
+class AnalyticsController {
+    +get_metrics(user_id: int, period: str) : List[MetricDTO]
+    +get_report(user_id: int, period: str) : ReportDTO
+    +check_alerts(user_id: int) : List[AlertDTO]
+}
+
+' === Сервисы ===
+class AggregationService {
+    -telemetry_client: TelemetryClient
+    -repository: AnalyticsRepository
+    +calculate_average(metric: str, period: str) : float
+    +calculate_trends(metric: str, period: str) : Dict
+}
+
+class ReportService {
+    -repository: AnalyticsRepository
+    +generate_report(user_id: int, period: str) : ReportDTO
+}
+
+class AlertService {
+    -repository: AnalyticsRepository
+    +evaluate_alerts(user_id: int) : List[AlertDTO]
+}
+
+' === Инфраструктура ===
+class TelemetryClient {
+    +fetch_data(device_id: int, start_time: datetime, end_time: datetime) : List[TelemetryDTO]
+}
+
+class AnalyticsRepository {
+    -db_session: Session
+    +save_aggregated_data(data: AggregatedData) : None
+    +get_aggregated_data(user_id: int, period: str) : List[AggregatedData]
+    +get_metrics(user_id: int) : List[Metric]
+    +get_alert_rules(user_id: int) : List[AlertRule]
+}
+
+' === Модели данных ===
+class Metric {
+    +id: int
+    +name: str
+    +unit: str
+}
+
+class AggregatedData {
+    +id: int
+    +metric_id: int
+    +avg_value: float
+    +min_value: float
+    +max_value: float
+    +timestamp: datetime
+}
+
+class Report {
+    +id: int
+    +user_id: int
+    +period: str
+    +created_at: datetime
+    +content: str
+}
+
+class AlertRule {
+    +id: int
+    +metric_id: int
+    +threshold: float
+    +comparison: str
+}
+
+class Alert {
+    +id: int
+    +user_id: int
+    +metric_id: int
+    +message: str
+    +timestamp: datetime
+}
+
+' === DTO объекты ===
+class MetricDTO
+class ReportDTO
+class AlertDTO
+class TelemetryDTO
+
+' === Отношения ===
+AnalyticsController --> AggregationService : uses
+AnalyticsController --> ReportService : uses
+AnalyticsController --> AlertService : uses
+
+AggregationService --> TelemetryClient : uses
+AggregationService --> AnalyticsRepository : uses
+ReportService --> AnalyticsRepository : uses
+AlertService --> AnalyticsRepository : uses
+
+AnalyticsRepository --> Metric
+AnalyticsRepository --> AggregatedData
+AnalyticsRepository --> AlertRule
+AnalyticsRepository --> Alert
+
+ReportService --> Report
+AlertService --> Alert
+
+@enduml

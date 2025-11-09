@@ -1,0 +1,19 @@
+@startuml C4_Components_analytic_service
+!include ../C4_Component.puml
+
+Container_Boundary(analytics_service, "Analytics Service") {
+    Component(api, "Analytics API", "FastAPI", "Предоставляет статистику и отчёты")
+    Component(aggregator, "Data Aggregator", "Python module", "Агрегирует данные телеметрии, вычисляет тренды")
+    Component(alert_engine, "Alert Engine", "Python module", "Генерирует уведомления при отклонениях")
+    ComponentDb(analytics_db, "Analytics DB", "PostgreSQL", "Таблицы: telemetry_view, alerts")
+}
+
+System_Ext(telemetry_service, "Telemetry Service", "Источник данных телеметрии")
+
+Rel(telemetry_service, aggregator, "Передаёт данные для анализа")
+Rel(aggregator, analytics_db, "Сохраняет агрегированные данные")
+Rel(alert_engine, analytics_db, "Читает и обновляет таблицу alerts")
+Rel(api, aggregator, "Отдаёт клиентам готовую аналитику и графики")
+
+SHOW_LEGEND()
+@enduml

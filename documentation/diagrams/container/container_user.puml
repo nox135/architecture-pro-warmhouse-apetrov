@@ -1,0 +1,20 @@
+@startuml C4_Containers_UserService
+!include ../C4_Container.puml
+
+
+Person(user, "Пользователь", "Владелец дома")
+
+System_Boundary(us, "User Service") {
+    Container(api, "User API", "Flask / Python", "Обработка HTTP-запросов пользователей")
+    Container(auth, "Auth Component", "Python", "Аутентификация и авторизация")
+    Container(profile, "Profile Component", "Python", "Управление профилем и домами пользователя")
+    ContainerDb(db, "Users DB", "PostgreSQL", "Данные пользователей, домов, ролей")
+}
+
+Rel(user, api, "Отправляет запросы")
+Rel(api, auth, "Проверяет логин/пароль, токен")
+Rel(api, profile, "Изменяет данные профиля")
+Rel(auth, db, "Сохраняет и получает данные пользователей")
+Rel(profile, db, "Сохраняет и получает данные профиля")
+
+@enduml
