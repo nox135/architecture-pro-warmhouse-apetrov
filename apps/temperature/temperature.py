@@ -55,7 +55,7 @@ def get_temperature_by_id(sensor_id):
     return jsonify({
         "sensorId": sensor_id,
         "location": location,
-        "temperature": temperature
+        "value": temperature
     })
 
 
