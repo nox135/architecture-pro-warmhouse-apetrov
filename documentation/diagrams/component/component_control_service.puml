@@ -1,0 +1,18 @@
+@startuml C4_Components_control_service
+!include ../C4_Component.puml
+
+Container_Boundary(control_service, "Control Service") {
+    Component(api, "Control API", "Flask REST API", "Принимает команды на управление устройствами")
+    Component(command_handler, "Command Handler", "Python module", "Обрабатывает команды: включить/выключить/изменить режим")
+    Component(state_manager, "State Manager", "Python module", "Следит за текущим состоянием устройств")
+    ComponentDb(control_db, "Control DB", "PostgreSQL", "Таблицы: device_state, control_logs")
+}
+
+System_Ext(device, "Физические устройства", "Умные реле, камеры, датчики")
+
+Rel(api, command_handler, "Передаёт команды")
+Rel(command_handler, device, "Отправляет команду на устройство")
+Rel(command_handler, state_manager, "Обновляет состояние устройства")
+Rel(state_manager, control_db, "Читает и записывает состояния")
+
+@enduml

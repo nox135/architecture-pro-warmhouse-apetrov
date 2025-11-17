@@ -1,0 +1,631 @@
+openapi: 3.0.3
+info:
+  title: WarmHouse API
+  version: 1.1.0
+  description: Полная спецификация API для всех микросервисов системы "Тёплый дом" с сенсорами и отчетами
+
+servers:
+  - url: http://localhost:5000
+    description: Локальный сервер User Service
+  - url: http://localhost:5001
+    description: Локальный сервер Device/Control Service
+  - url: http://localhost:5002
+    description: Локальный сервер Telemetry/Analytics Service
+
+tags:
+  - name: Users
+    description: Микросервис управления пользователями
+  - name: Devices
+    description: Микросервис управления устройствами
+  - name: Control
+    description: Микросервис управления командами устройств
+  - name: Telemetry
+    description: Микросервис сбора телеметрии
+  - name: Analytics
+    description: Микросервис обработки данных и отчетов
+
+# ===================== User Service =====================
+paths:
+  /users:
+    get:
+      summary: Получить список всех пользователей
+      tags:
+        - Users
+      responses:
+        '200':
+          description: Список пользователей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    username:
+                      type: string
+                      example: ivan
+                    email:
+                      type: string
+                      example: ivan@example.com
+    post:
+      summary: Создать нового пользователя
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - email
+              properties:
+                username:
+                  type: string
+                  example: ivan
+                email:
+                  type: string
+                  example: ivan@example.com
+      responses:
+        '201':
+          description: Пользователь создан
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  username:
+                    type: string
+                    example: ivan
+                  email:
+                    type: string
+                    example: ivan@example.com
+        '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid input data"
+
+  /users/{id}:
+    get:
+      summary: Получить пользователя по ID
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            example: 1
+          description: ID пользователя
+      responses:
+        '200':
+          description: Данные пользователя
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  username:
+                    type: string
+                    example: ivan
+                  email:
+                    type: string
+                    example: ivan@example.com
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User not found"
+
+# ===================== Device Service =====================
+  /devices:
+    get:
+      summary: Получить список всех устройств
+      tags:
+        - Devices
+      responses:
+        '200':
+          description: Массив устройств
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    home_id:
+                      type: integer
+                      example: 101
+                    device_type:
+                      type: string
+                      example: thermostat
+                    name:
+                      type: string
+                      example: "Living Room Thermostat"
+                    status:
+                      type: string
+                      example: "on"
+                    last_updated:
+                      type: string
+                      example: "2025-11-08T12:00:00Z"
+    post:
+      summary: Зарегистрировать новое устройство
+      tags:
+        - Devices
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - home_id
+                - device_type
+                - name
+              properties:
+                home_id:
+                  type: integer
+                  example: 101
+                device_type:
+                  type: string
+                  example: thermostat
+                name:
+                  type: string
+                  example: "Living Room Thermostat"
+      responses:
+        '201':
+          description: Устройство создано
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  home_id:
+                    type: integer
+                    example: 101
+                  device_type:
+                    type: string
+                    example: thermostat
+                  name:
+                    type: string
+                    example: "Living Room Thermostat"
+                  status:
+                    type: string
+                    example: "off"
+                  last_updated:
+                    type: string
+                    example: "2025-11-08T12:00:00Z"
+        '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid input data"
+
+  /devices/{device_id}:
+    get:
+      summary: Получить устройство по ID
+      tags:
+        - Devices
+      parameters:
+        - in: path
+          name: device_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Данные устройства
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  home_id:
+                    type: integer
+                    example: 101
+                  device_type:
+                    type: string
+                    example: thermostat
+                  name:
+                    type: string
+                    example: "Living Room Thermostat"
+                  status:
+                    type: string
+                    example: "on"
+                  last_updated:
+                    type: string
+                    example: "2025-11-08T12:00:00Z"
+        '404':
+          description: Устройство не найдено
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Device not found"
+
+# ===================== Sensors =====================
+  /telemetry/sensors:
+    get:
+      summary: Получить список всех сенсоров
+      tags:
+        - Telemetry
+      responses:
+        '200':
+          description: Список сенсоров
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    sensor_id:
+                      type: integer
+                      example: 1
+                    device_id:
+                      type: integer
+                      example: 101
+                    type:
+                      type: string
+                      example: temperature
+                    description:
+                      type: string
+                      example: "Температурный датчик в гостиной"
+
+  /devices/{device_id}/sensors:
+    get:
+      summary: Получить все сенсоры конкретного устройства
+      tags:
+        - Devices
+      parameters:
+        - in: path
+          name: device_id
+          required: true
+          schema:
+            type: integer
+            example: 101
+      responses:
+        '200':
+          description: Список сенсоров устройства
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    sensor_id:
+                      type: integer
+                      example: 1
+                    type:
+                      type: string
+                      example: temperature
+                    description:
+                      type: string
+                      example: "Температурный датчик в гостиной"
+        '404':
+          description: Устройство не найдено
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Device not found"
+
+# ===================== Control Service =====================
+  /devices/{device_id}/commands:
+    post:
+      summary: Отправить команду устройству
+      tags:
+        - Control
+      parameters:
+        - in: path
+          name: device_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - command
+              properties:
+                command:
+                  type: string
+                  example: turn_on
+                parameters:
+                  type: object
+                  example:
+                    duration_minutes: 10
+      responses:
+        '200':
+          description: Команда выполнена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  command:
+                    type: string
+                    example: turn_on
+                  status:
+                    type: string
+                    example: executed
+                  executed_at:
+                    type: string
+                    example: "2025-11-08T12:05:00Z"
+        '400':
+          description: Некорректная команда
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid command"
+        '404':
+          description: Устройство не найдено
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Device not found"
+
+# ===================== Telemetry Service =====================
+  /telemetry:
+    get:
+      summary: Получить все данные телеметрии
+      tags:
+        - Telemetry
+      responses:
+        '200':
+          description: Массив данных телеметрии
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    device_id:
+                      type: integer
+                      example: 1
+                    metric:
+                      type: string
+                      example: temperature
+                    value:
+                      type: number
+                      example: 23.5
+                    timestamp:
+                      type: string
+                      example: "2025-11-08T12:00:00Z"
+    post:
+      summary: Добавить новые данные телеметрии
+      tags:
+        - Telemetry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - device_id
+                - metric
+                - value
+                - timestamp
+              properties:
+                device_id:
+                  type: integer
+                  example: 1
+                metric:
+                  type: string
+                  example: temperature
+                value:
+                  type: number
+                  example: 23.5
+                timestamp:
+                  type: string
+                  example: "2025-11-08T12:00:00Z"
+      responses:
+        '201':
+          description: Данные сохранены
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  device_id:
+                    type: integer
+                    example: 1
+                  metric:
+                    type: string
+                    example: temperature
+                  value:
+                    type: number
+                    example: 23.5
+                  timestamp:
+                    type: string
+                    example: "2025-11-08T12:00:00Z"
+        '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid input data"
+
+# ===================== Analytics Service =====================
+  /reports:
+    get:
+      summary: Получить все отчеты
+      tags:
+        - Analytics
+      responses:
+        '200':
+          description: Массив отчетов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    report_id:
+                      type: integer
+                      example: 1
+                    user_id:
+                      type: integer
+                      example: 1
+                    period:
+                      type: string
+                      example: "2025-11"
+                    content:
+                      type: string
+                      example: "Average temperature report"
+                    created_at:
+                      type: string
+                      example: "2025-11-08T12:00:00Z"
+
+  /reports/parameter/{parameter_name}:
+    get:
+      summary: Получить отчет по конкретному параметру
+      tags:
+        - Analytics
+      parameters:
+        - in: path
+          name: parameter_name
+          required: true
+          schema:
+            type: string
+            example: temperature
+      responses:
+        '200':
+          description: Отчет по параметру
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    device_id:
+                      type: integer
+                      example: 101
+                    sensor_id:
+                      type: integer
+                      example: 1
+                    parameter:
+                      type: string
+                      example: temperature
+                    value:
+                      type: number
+                      example: 23.5
+                    timestamp:
+                      type: string
+                      example: "2025-11-08T12:00:00Z"
+        '404':
+          description: Данные не найдены
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "No data found for this parameter"
+
+  /reports/sensor/{sensor_id}:
+    get:
+      summary: Получить отчет по конкретному сенсору
+      tags:
+        - Analytics
+      parameters:
+        - in: path
+          name: sensor_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Отчет по сенсору
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    timestamp:
+                      type: string
+                      example: "2025-11-08T12:00:00Z"
+                    value:
+                      type: number
+                      example: 23.5
+        '404':
+          description: Сенсор не найден
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Sensor not found"

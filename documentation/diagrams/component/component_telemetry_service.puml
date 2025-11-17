@@ -1,0 +1,17 @@
+@startuml C4_Components_telemetry
+!include ../C4_Component.puml
+
+Container_Boundary(telemetry_service, "Telemetry Service") {
+    Component(api, "Telemetry API", "FastAPI", "Приём данных от устройств")
+    Component(collector, "Data Collector", "Python module", "Обрабатывает входящие данные телеметрии")
+    ComponentDb(telemetry_db, "Telemetry DB", "TimescaleDB", "Таблицы: telemetry, metrics")
+}
+
+System_Ext(device, "Физические устройства", "Передают данные о температуре, влажности и т.д.")
+
+Rel(device, collector, "Отправляют показания (HTTP)")
+Rel(collector, telemetry_db, "Сохраняет данные")
+Rel(api, telemetry_db, "Позволяет получить данные")
+Rel(api, collector, "Принимает данные от устройств")
+
+@enduml

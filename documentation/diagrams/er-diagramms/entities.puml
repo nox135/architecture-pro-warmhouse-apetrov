@@ -1,0 +1,132 @@
+@startuml ER_AllDomains
+!define TABLE(name,desc) class name as "desc" << (T,#FFAAAA) >>
+skinparam linetype ortho
+skinparam shadowing false
+
+title ER-диаграмма для экосистемы "Тёплый дом"
+
+' ===================
+' Домен Пользователи
+' ===================
+TABLE(users, "Пользователи") {
+  +id : int <<PK>>
+  username : string
+  email : string
+  password_hash : string
+  created_at : datetime
+}
+
+TABLE(homes, "Дома пользователей") {
+  +id : int <<PK>>
+  user_id : int <<FK>>
+  address : string
+  created_at : datetime
+}
+
+TABLE(roles, "Роли пользователей") {
+  +id : int <<PK>>
+  name : string
+}
+
+TABLE(sessions, "Сессии пользователей") {
+  +id : int <<PK>>
+  user_id : int <<FK>>
+  token : string
+  expires_at : datetime
+}
+
+' ===================
+' Домен Устройства
+' ===================
+TABLE(devices, "Устройства") {
+  +id : int <<PK>>
+  home_id : int <<FK>>
+  device_type_id : int <<FK>>
+  name : string
+  created_at : datetime
+}
+
+TABLE(device_types, "Типы устройств") {
+  +id : int <<PK>>
+  name : string
+  description : string
+}
+
+TABLE(device_state, "Состояние устройств") {
+  +id : int <<PK>>
+  device_id : int <<FK>>
+  status : string
+  last_updated : datetime
+}
+
+
+' ===================
+' Домен Телеметрия
+' ===================
+TABLE(telemetry, "Данные телеметрии") {
+  +id : int <<PK>>
+  device_id : int <<FK>>
+  metric_id : int <<FK>>
+  value : float
+  timestamp : datetime
+}
+
+TABLE(metrics, "Метрики") {
+  +id : int <<PK>>
+  name : string
+  unit : string
+}
+
+TABLE(aggregated_data, "Агрегированные данные") {
+  +id : int <<PK>>
+  metric_id : int <<FK>>
+  device_id : int <<FK>>
+  avg_value : float
+  min_value : float
+  max_value : float
+  timestamp : datetime
+}
+
+TABLE(alerts, "Оповещения") {
+  +id : int <<PK>>
+  metric_id : int <<FK>>
+  device_id : int <<FK>>
+  user_id : int <<FK>>
+  message : string
+  created_at : datetime
+}
+
+TABLE(alert_rules, "Правила оповещений") {
+  +id : int <<PK>>
+  metric_id : int <<FK>>
+  threshold : float
+  comparison : string
+}
+
+TABLE(reports, "Отчёты аналитики") {
+  +id : int <<PK>>
+  user_id : int <<FK>>
+  period : string
+  content : text
+  created_at : datetime
+}
+
+' ===================
+' Связи
+' ===================
+users "1" -- "0..*" homes : owns
+users "1" -- "0..*" sessions : has
+homes "1" -- "0..*" devices : contains
+devices "1" -- "0..*" device_state : has
+device_types "1" -- "0..*" devices : type
+devices "1" -- "0..*" telemetry : reports
+metrics "1" -- "0..*" telemetry : measures
+devices "1" -- "0..*" aggregated_data : aggregated
+metrics "1" -- "0..*" aggregated_data : aggregates
+devices "1" -- "0..*" alerts : triggers
+metrics "1" -- "0..*" alerts : triggers
+users "1" -- "0..*" alerts : receives
+metrics "1" -- "0..*" alert_rules : defines
+users "1" -- "0..*" reports : owns
+
+@enduml

@@ -1,0 +1,37 @@
+@startuml C4_Containers_All
+!include ../C4_Container.puml
+
+Person(user, "Пользователь", "Использует веб или мобильное приложение")
+
+System_Boundary(house, "Экосистема 'Тёплый дом'") {
+
+    Container(api, "API Gateway", "Nginx / Flask", "Единая точка входа для всех микросервисов")
+
+    Container(user_service, "User Service", "Flask / Python", "Регистрация, авторизация, управление пользователями")
+    ContainerDb(user_db, "Users DB", "PostgreSQL", "Хранение данных пользователей")
+
+    Container(device_service, "Device Service", "Flask / Python", "Регистрация, управление и интеграция устройств")
+    ContainerDb(device_db, "Devices DB", "PostgreSQL", "Хранение данных об устройствах")
+
+    Container(telemetry_service, "Telemetry Service", "FastAPI / Python", "Приём, хранение и анализ телеметрии")
+    ContainerDb(telemetry_db, "Telemetry DB", "TimescaleDB", "Данные от датчиков и история показаний")
+}
+
+System_Ext(ext_device, "Умные устройства", "Датчики, реле, камеры, ворота, лампы и т.д.")
+System_Ext(ext_partner, "Партнёрские API", "Интеграция с устройствами сторонних производителей")
+
+Rel(user, api, "Отправляет команды и получает данные")
+Rel(api, user_service, "Запросы пользователей")
+Rel(api, device_service, "Команды управления устройствами")
+Rel(api, telemetry_service, "Запросы телеметрии")
+
+Rel(device_service, telemetry_service, "Передаёт данные телеметрии")
+Rel(device_service, ext_device, "Управляет устройствами (вкл/выкл)")
+Rel(telemetry_service, ext_device, "Собирает телеметрию (температура и т.д.)")
+Rel(device_service, ext_partner, "Интеграция с партнёрскими устройствами")
+
+Rel(user_service, user_db, "Читает и пишет")
+Rel(device_service, device_db, "Читает и пишет")
+Rel(telemetry_service, telemetry_db, "Хранит телеметрию")
+
+@enduml

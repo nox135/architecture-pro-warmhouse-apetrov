@@ -1,5 +1,8 @@
--- Create the database if it doesn't exist
-CREATE DATABASE smarthome;
+-- Create the database only if it doesn't already exist.
+-- Using psql trick: produce CREATE DATABASE command only when missing and execute it with \gexec.
+-- This avoids failing when the DB already exists and preserves existing data.
+SELECT 'CREATE DATABASE smarthome'
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'smarthome')\gexec
 
 -- Connect to the database
 \c smarthome;
